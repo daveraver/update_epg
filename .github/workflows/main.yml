@@ -1,0 +1,36 @@
+name: Actualitzar EPG Historic
+
+on:
+  schedule:
+    # S'executarà cada dia a les 08:00 AM UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Permet executar-lo manualment per provar
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout del repositori
+      uses: actions/checkout@v3
+
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Instal·lar dependències
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: Executar script d'actualització
+      run: python actualitzar_epg.py
+
+    - name: Pujar canvis al repositori
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add epg_historic.xml.gz
+        git commit -m "Actualització automàtica EPG: $(date)" || echo "Sense canvis per fer commit"
+        git push
