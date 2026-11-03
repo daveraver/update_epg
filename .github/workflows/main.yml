@@ -6,18 +6,22 @@ on:
     - cron: '0 8 * * *'
   workflow_dispatch: # Permet executar-lo manualment per provar
 
+# Imprescindible perquè el bot pugui fer git push al repositori
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout del repositori
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Configurar Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
+        python-version: '3.12'
 
     - name: Instal·lar dependències
       run: |
@@ -29,8 +33,13 @@ jobs:
 
     - name: Pujar canvis al repositori
       run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add epg_historic.xml.gz
-        git commit -m "Actualització automàtica EPG: $(date)" || echo "Sense canvis per fer commit"
-        git push
+        if git diff --staged --quiet; then
+          echo "Sense canvis per fer commit"
+        else
+          git commit -m "Actualització automàtica EPG: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+          git push
+        fi
+        
