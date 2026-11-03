@@ -2,34 +2,27 @@ name: Actualitzar EPG Historic
 
 on:
   schedule:
-    # S'executarà cada dia a les 08:00 AM UTC
     - cron: '0 8 * * *'
-  workflow_dispatch: # Permet executar-lo manualment per provar
+  workflow_dispatch:
 
-# Imprescindible perquè el bot pugui fer git push al repositori
 permissions:
   contents: write
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout del repositori
       uses: actions/checkout@v4
 
-    - name: Configurar Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.9'
-
     - name: Instal·lar dependències
       run: |
-        python -m pip install --upgrade pip
-        pip install requests
+        python3 -m pip install --upgrade pip --break-system-packages || true
+        python3 -m pip install requests --break-system-packages || python3 -m pip install requests
 
     - name: Executar script d'actualització
-      run: python actualizar_epg.py
+      run: python3 actualizar_epg.py
 
     - name: Pujar canvis al repositori
       run: |
